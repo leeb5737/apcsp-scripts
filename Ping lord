@@ -1,0 +1,43 @@
+#!/bin/bash
+
+IP=`hostname -I`
+echo $IP
+IP=${IP%.*}
+echo $IP
+Tag=""
+IPAD=""
+SSH=""
+HTTP=""
+Name=""
+MAD=""
+for i in {1..255} ; do
+    ping $IP."$i" -c 1 -i 1  &> /dev/null
+        if [ $? -eq 0 ] ; then
+		IPAD="$IP."$i
+		nc -zv -w 1 $IP."$i" 22 &> /dev/null
+		    if [ $? -eq 0 ] ; then
+                	SSH="YES"
+		    else
+			SSH="NA"
+           	    fi
+		nc -zv -w 1 $IP."$i" 80 &> /dev/null
+                    if [ $? -eq 0 ] ; then
+                        HTTP="YES"
+		    else
+			HTTP="NA"
+		    fi
+		host $IP."$i" &> /dev/null
+		    if [ $? -eq 0 ] ; then
+                        Name=`host 172.19.32."$i" | awk '{ print $5 }'`
+		    else
+			Name="NA"
+                    fi
+
+		MAD=` arp -a "$IP."$i | awk '{ print $4 }'`
+		echo Name: $Name, IP: $IPAD, SSH: $SSH, HTTP: $HTTP, Mac Address: $MAD
+        else
+                echo $IP."$i" : Not Active
+        fi
+
+done
+exit  0
